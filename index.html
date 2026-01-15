@@ -21,8 +21,8 @@
 </div>
 
 <script>
-    
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpHLRC0cnjgnR-ino6J2hM7BNLkXj-5-qoDbJ826-y_g03FjDai5tcOZu7kGlV8nQj/exec";
+    // *** ВАЖНО: Замените на свою ссылку из Google Apps Script ***
+    const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_SCRIPT_URL";
 
     const tg = window.Telegram.WebApp;
     tg.ready(); // Сообщаем Телеграму, что приложение готово
@@ -65,3 +65,37 @@
 </script>
 </body>
 </html>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsHfwbe9WpJrdQfc52g1J0jy_i3gMX6ICoqJrAYYJKToBSPN2ruRJEqhA_hUsNjVQA/exec";
+
+    const tg = window.Telegram.WebApp;
+    tg.ready(); 
+
+    // Функция запускается сразу при открытии Mini App
+    window.onload = function() {
+        const statusDiv = document.getElementById('status');
+        
+        if (!tg.initDataUnsafe.user) {
+            statusDiv.innerText = 'Ошибка: Откройте через приложение Telegram.';
+            return;
+        }
+
+        const user = tg.initDataUnsafe.user;
+        const firstName = user.first_name || 'Аноним';
+        const phonePlaceholder = 'Телефон не получен';
+        const chatId = user.id; // *** Получаем ID чата пользователя ***
+
+        statusDiv.innerText = 'Отправляем данные в таблицу и боту...';
+
+        // *** Добавляем chat_id в URL запроса ***
+        const url = `${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(firstName)}&phone=${encodeURIComponent(phonePlaceholder)}&chat_id=${encodeURIComponent(chatId)}`;
+        
+        fetch(url)
+            .then(response => response.text())
+            .then(code => {
+                statusDiv.innerHTML = `✅ **Готово!** Ваш код: **${code}**. <br><br> Бот отправит его вам в чат.`;
+                tg.close(); 
+            })
+            .catch(error => {
+                statusDiv.innerText = 'Произошла ошибка при отправке.';
+            });
+    }
