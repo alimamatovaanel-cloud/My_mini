@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Регистрация EMIN</title>
+    <script src="telegram.org"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        button { padding: 15px 30px; font-size: 18px; cursor: pointer; }
+        #status { margin-top: 20px; color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>Получите свой код EMIN!</h2>
+    <p>Нажмите кнопку ниже, чтобы поделиться номером телефона и получить уникальный код.</p>
+
+    <button onclick="registerUser()">Получить код</button>
+    
+    <div id="status"></div>
+
+    <script>
+        
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxW1QWR3DIqEOKNjlkS12o1MNncg3zI_2tf7nAyP4llgebOM3UE_B18cQBXfNAuhFXl/exec";
+
+        function registerUser() {
+            const tg = window.Telegram.WebApp;
+            
+            if (!tg.initDataUnsafe.user) {
+                document.getElementById('status').innerText = 'Ошибка: Откройте через приложение Telegram.';
+                return;
+            }
+
+            const user = tg.initDataUnsafe.user;
+            const name = user.first_name + ' ' + (user.last_name || '');
+            
+            // Запрос номера телефона через API Телеграма
+            tg.showMainButton();
+            tg.MainButton.setText("Поделиться телефоном");
+            tg.MainButton.onClick(function() {
+                // В этом простом примере мы просто отправляем имя пользователя и ждем, что он поделится телефоном через стандартную кнопку Telegram
+                // Для запроса номера нужна другая реализация на стороне бота, но для этого шага подойдет отправка имени
+                sendDataToGoogleScript(name, 'Номер не предоставлен через кнопку');
+            });
+
+            // Для простоты пока отправляем только имя в таблицу
+            sendDataToGoogleScript(name, 'Ожидает номер');
+        }
+
+        function sendDataToGoogleScript(name, phone) {
+            const url = `${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone)}`;
+            
+            fetch(url)
+                .then(response => response.text())
+                .then(code => {
+                    document.getElementById('status').innerHTML = `✅ **Готово!** Ваш код: **${code}**`;
+                    window.Telegram.WebApp.MainButton.hide();
+                })
+                .catch(error => {
+                    document.getElementById('status').innerText = 'Произошла ошибка при получении кода.';
+                    console.error('Error:', error);
+                });
+        }
+    </script>
+</body>
+</html>
