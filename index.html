@@ -1,10 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Регистрация EMIN</title>
+    <script src="telegram.org"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 40px 20px; }
+        .container { max-width: 400px; margin: auto; }
+        /* Стили для красоты */
+        #status { margin-top: 20px; color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Привет!</h2>
+    <p>Чтобы получить уникальный код EMIN и зарегистрироваться, просто откройте это окно.</p>
+    
+    <div id="status">Обработка...</div>
+</div>
+
+<script>
     // *** ВАЖНО: Замените на свою НОВУЮ ссылку из Google Apps Script ***
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsHfwbe9WpJrdQfc52g1J0jy_i3gMX6ICoqJrAYYJKToBSPN2ruRJEqhA_hUsNjVQA/exec";
 
     const tg = window.Telegram.WebApp;
     tg.ready(); 
 
-    // Функция запускается сразу при открытии Mini App
+    // Функция запускается сразу при открытии Mini App (window.onload)
     window.onload = function() {
         const statusDiv = document.getElementById('status');
         
@@ -15,21 +36,26 @@
 
         const user = tg.initDataUnsafe.user;
         const firstName = user.first_name || 'Аноним';
-        const phonePlaceholder = 'Телефон не получен';
-        const chatId = user.id; // *** Получаем ID чата пользователя ***
+        const phonePlaceholder = 'Телефон не получен'; // Пока нет запроса номера
+        const chatId = user.id; // Получаем ID чата пользователя
 
         statusDiv.innerText = 'Отправляем данные в таблицу и боту...';
 
-        // *** Добавляем chat_id в URL запроса ***
+        // Добавляем chat_id в URL запроса к Google Script
         const url = `${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(firstName)}&phone=${encodeURIComponent(phonePlaceholder)}&chat_id=${encodeURIComponent(chatId)}`;
         
+        // Отправляем запрос
         fetch(url)
             .then(response => response.text())
             .then(code => {
                 statusDiv.innerHTML = `✅ **Готово!** Ваш код: **${code}**. <br><br> Бот отправит его вам в чат.`;
-                tg.close(); 
+                tg.close(); // Закрываем Mini App автоматически
             })
             .catch(error => {
                 statusDiv.innerText = 'Произошла ошибка при отправке.';
+                console.error('Error:', error);
             });
     }
+</script>
+</body>
+</html>
