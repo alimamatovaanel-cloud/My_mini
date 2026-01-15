@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Регистрация EMIN</title>
+    <script src="telegram.org"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <h2>Получаем ваш код...</h2>
+    <p>Пожалуйста, подождите.</p>
+    
+    <div id="status"></div>
+
+    <script>
+
+        const GOOGLE_SCRIPT_URL = "https://alimamatovaanel-cloud.github.io/My_mini/";
+
+        // Функция запускается сразу при открытии Mini App
+        window.onload = function() {
+            const statusDiv = document.getElementById('status');
+            const tg = window.Telegram.WebApp;
+
+            if (!tg.initDataUnsafe.user) {
+                statusDiv.innerText = 'Ошибка: Откройте через приложение Telegram.';
+                return;
+            }
+
+            const user = tg.initDataUnsafe.user;
+            const name = user.first_name + ' ' + (user.last_name || '');
+            const phonePlaceholder = 'Телефон не получен'; // Заглушка, пока нет кнопки номера
+
+            statusDiv.innerText = 'Отправляем данные в таблицу...';
+
+            const url = `${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phonePlaceholder)}`;
+            
+            fetch(url)
+                .then(response => response.text())
+                .then(code => {
+                    statusDiv.innerHTML = `✅ **Готово!** Ваш код: **${code}**. <br><br> Теперь вы можете закрыть это окно.`;
+                    // Показываем кнопку закрытия окна Telegram
+                    tg.ready();
+                    tg.close(); 
+                })
+                .catch(error => {
+                    statusDiv.innerText = 'Произошла ошибка при получении кода.';
+                    console.error('Error:', error);
+                });
+        }
+    </script>
+</body>
+</html>
